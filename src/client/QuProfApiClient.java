@@ -36,8 +36,8 @@ public class QuProfApiClient {
 	private ProfessorGeneralInfo mapProfessorGeneralInfoParams(JsonObject generalInfoJson) {
         String fullName = existsInJson(generalInfoJson, "FullName") ? generalInfoJson.get("FullName").getAsString() : "";
         ArrayList<String> positions = new ArrayList<>();
-        if (!existsInJson(generalInfoJson, "Position")) {
-        JsonArray positionsJson = generalInfoJson.get("Position").getAsJsonArray();
+        if (existsInJson(generalInfoJson, "Position")) {
+	        JsonArray positionsJson = generalInfoJson.get("Position").getAsJsonArray();
 	        for (int i = 0; i < positionsJson.size(); i++) {
 	        	positions.add(positionsJson.get(i).getAsString());
 	        }
