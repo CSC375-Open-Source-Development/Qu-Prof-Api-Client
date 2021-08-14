@@ -7,12 +7,14 @@ public class ProfessorDetailedInfo {
     private ArrayList<String> organizations;
     private String officeLocation;
     private String mailDropLocation;
+    private ArrayList<Course> courses;
     
-	public ProfessorDetailedInfo(ArrayList<String> educations, ArrayList<String> organizations, String officeLocation, String mailDropLocation) {
+	public ProfessorDetailedInfo(ArrayList<String> educations, ArrayList<String> organizations, String officeLocation, String mailDropLocation, ArrayList<Course> courses) {
 		this.educations = educations;
 		this.organizations = organizations;
 		this.officeLocation = officeLocation;
 		this.mailDropLocation = mailDropLocation;
+		this.courses = courses;
 	}
 
 	public ArrayList<String> getEducations() {
@@ -31,9 +33,14 @@ public class ProfessorDetailedInfo {
 		return mailDropLocation;
 	}
 
+	public ArrayList<Course> getCourses() {
+		return courses;
+	}
+
 	@Override
 	public String toString() {
 		return "ProfessorDetailedInfo [educations=" + educations + ", organizations=" + organizations
-				+ ", officeLocation=" + officeLocation + ", mailDropLocation=" + mailDropLocation + "]";
+				+ ", officeLocation=" + officeLocation + ", mailDropLocation=" + mailDropLocation + ", courses="
+				+ courses + "]";
 	}
 }

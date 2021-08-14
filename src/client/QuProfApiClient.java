@@ -1,10 +1,7 @@
 package client;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import javax.management.RuntimeErrorException;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -14,6 +11,7 @@ import org.jsoup.select.Elements;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import responseObjects.Course;
 import responseObjects.Professor;
 import responseObjects.ProfessorDetailedInfo;
 import responseObjects.ProfessorGeneralInfo;
@@ -38,6 +36,23 @@ public class QuProfApiClient {
         return professors;
 	}
 	
+	private ProfessorGeneralInfo mapProfessorGeneralInfoParams(JsonObject generalInfoJson) {
+        String fullName = !isJsonNull(generalInfoJson, "FullName") ? generalInfoJson.get("FullName").getAsString() : "";
+        ArrayList<String> positions = new ArrayList<>();
+        if (!isJsonNull(generalInfoJson, "Position")) {
+        JsonArray positionsJson = generalInfoJson.get("Position").getAsJsonArray();
+	        for (int i = 0; i < positionsJson.size(); i++) {
+	        	positions.add(positionsJson.get(i).getAsString());
+	        }
+        }
+        String imageUrl = !isJsonNull(generalInfoJson, "Image") ? generalInfoJson.get("Image").getAsString() : "";
+        String department = !isJsonNull(generalInfoJson, "Department") ? generalInfoJson.get("Department").getAsString() : "";
+        String phoneNumber = !isJsonNull(generalInfoJson, "PhoneNumber") ? generalInfoJson.get("PhoneNumber").getAsString() : "";
+        String emailAddress = !isJsonNull(generalInfoJson, "EmailAddress") ? generalInfoJson.get("EmailAddress").getAsString() : "";
+        String profileUrl = !isJsonNull(generalInfoJson, "ProfileUrl") ? generalInfoJson.get("ProfileUrl").getAsString() : "";
+        return new ProfessorGeneralInfo(fullName, positions, imageUrl, department, phoneNumber, emailAddress, profileUrl);
+	}
+	
 	private ProfessorDetailedInfo getProfessorDetailedInfo(String profileUrl) {
     	String professorProfileEndpoint = "https://www.qu.edu" +  profileUrl;
     	Document document = null;
@@ -51,11 +66,13 @@ public class QuProfApiClient {
         Element main = document.body().getElementById("main");
         Element profileDetails = main.getElementsByClass("profile-details").get(0);
         Elements profileDetailsBlocks = profileDetails.getElementsByClass("profile-details__block");
-        
+        Elements profileDetailsCoursesBlock = profileDetails.getElementsByClass("profile-details__courses");
+
         ArrayList<String> educations = new ArrayList<>();
         ArrayList<String> organizations = new ArrayList<>();
         String officeLocation = "";
         String mailDropLocation = "";
+        ArrayList<Course> courses = new ArrayList<>();
 
         for (int i = 0; i < profileDetailsBlocks.size(); i++) {
         	Element profileDetailsBlock = profileDetailsBlocks.get(i);
@@ -81,31 +98,30 @@ public class QuProfApiClient {
         		mailDropLocation = mailDropItem.html().trim();
         	}
         }
-        return new ProfessorDetailedInfo(educations, organizations, officeLocation, mailDropLocation);
-	}
-	
-	private ProfessorGeneralInfo mapProfessorGeneralInfoParams(JsonObject generalInfoJson) {
-        String fullName = !isJsonNull(generalInfoJson, "FullName") ? generalInfoJson.get("FullName").getAsString() : "";
-        ArrayList<String> positions = new ArrayList<>();
-        if (!isJsonNull(generalInfoJson, "Position")) {
-        JsonArray positionsJson = generalInfoJson.get("Position").getAsJsonArray();
-	        for (int i = 0; i < positionsJson.size(); i++) {
-	        	positions.add(positionsJson.get(i).getAsString());
+        
+        try {
+	        Elements courseListItems = profileDetailsCoursesBlock.get(0).getElementsByClass("profile-details__block-list-item");
+	        for (int i = 0; i < courseListItems.size(); i++) {
+	        	Element courseItem = courseListItems.get(i);
+	        	Element courseItemDetails = courseItem.getElementsByTag("a").get(0);
+	        	
+	        	String name = courseItemDetails.html().trim();
+	        	if (name.indexOf("<br>") != -1) {
+	            	name = name.substring(0, name.indexOf("<br>")).trim();
+	        	}
+	        	if (name.indexOf("<span>") != -1) {
+	        		name = name.substring(0, name.indexOf("<span>")).trim();
+	        	}
+	        	String semester = courseItemDetails.getElementsByTag("span").get(0).html().trim();
+	        	String catalogUrl = courseItemDetails.attr("href");
+	        	
+	        	courses.add(new Course(name, semester, catalogUrl));
 	        }
-        }
-        String imageUrl = !isJsonNull(generalInfoJson, "Image") ? generalInfoJson.get("Image").getAsString() : "";
-        String department = !isJsonNull(generalInfoJson, "Department") ? generalInfoJson.get("Department").getAsString() : "";
-        String phoneNumber = !isJsonNull(generalInfoJson, "PhoneNumber") ? generalInfoJson.get("PhoneNumber").getAsString() : "";
-        String emailAddress = !isJsonNull(generalInfoJson, "EmailAddress") ? generalInfoJson.get("EmailAddress").getAsString() : "";
-        String profileUrl = !isJsonNull(generalInfoJson, "ProfileUrl") ? generalInfoJson.get("ProfileUrl").getAsString() : "";
-        return new ProfessorGeneralInfo(fullName, positions, imageUrl, department, phoneNumber, emailAddress, profileUrl);
+        } catch (IndexOutOfBoundsException e) {
+			// professor has no course info available :(
+		}
+        return new ProfessorDetailedInfo(educations, organizations, officeLocation, mailDropLocation, courses);
 	}
-	
-	/*
-	private ProfessorDetailedInfo mapProfessorDetailedInfoParams(JsonObject detailedInfoJson) {
-		
-	}
-	*/
 	
 	private boolean isJsonNull(JsonObject json, String property) {
 		return !json.has(property) || json.get(property).isJsonNull();
