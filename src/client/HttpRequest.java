@@ -15,13 +15,9 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpRequest {
 
-    public static Response get(String endpoint, QueryParams queryParams) {
+    public static Response get(String endpoint) {
         try {
-            String queryString = "";
-            if (queryParams != null) {
-                queryString = queryParams.toQueryString();
-            }
-            URL url = new URL(endpoint + queryString);
+            URL url = new URL(endpoint);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
             conn.setRequestProperty("Accept", "*/*");

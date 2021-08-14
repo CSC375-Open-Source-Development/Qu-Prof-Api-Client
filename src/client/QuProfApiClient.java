@@ -18,11 +18,8 @@ import responseObjects.ProfessorGeneralInfo;
 
 public class QuProfApiClient {
 	public ArrayList<Professor> getProfessors() {
-        String facultyListingeEndpoint = "https://www.qu.edu/FacultyAndStaffListingApi/GetProfiles/";
-        QueryParams queryParams = new QueryParams() {{
-        	addParam("page", "2");
-        }};
-        Response response = HttpRequest.get(facultyListingeEndpoint, queryParams);
+        String facultyListingeEndpoint = "https://www.qu.edu/FacultyAndStaffListingApi/GetProfiles/?page=1";
+        Response response = HttpRequest.get(facultyListingeEndpoint);
         JsonObject jsonResponse = (JsonObject)response.getBody();
         JsonArray staffListingJson = jsonResponse.get("StaffListing").getAsJsonArray(); 
         
@@ -53,6 +50,11 @@ public class QuProfApiClient {
         return new ProfessorGeneralInfo(fullName, positions, imageUrl, department, phoneNumber, emailAddress, profileUrl);
 	}
 	
+	// this was such a PITA
+	// while I could grab quinnipiac's generic professor list in a nice json format,
+	// the individual professor profiles are just gigantic blobs of html data that was never meant to be retrieved in this kind of way.
+	// parsing html is exhausting
+	// I don't recommend you touch this method unless you 100% know what you are doing, it's fragile
 	private ProfessorDetailedInfo getProfessorDetailedInfo(String profileUrl) {
     	try {
 
