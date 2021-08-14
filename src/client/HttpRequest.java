@@ -24,7 +24,7 @@ public class HttpRequest {
             URL url = new URL(endpoint + queryString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Accept", "*/*");
 
             conn.setRequestMethod("GET");
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
@@ -63,6 +63,9 @@ public class HttpRequest {
                 for (String line; (line = reader.readLine()) != null; ) {
                     result.append(line);
                 }
+            }
+            catch(NullPointerException e) {
+            	return "Unable to extract error output";
             }
             return result.toString();
         } catch (IOException e) {
