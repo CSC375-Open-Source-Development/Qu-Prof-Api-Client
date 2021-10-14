@@ -4,7 +4,6 @@ public class Professor {
 	private ProfessorGeneralInfo generalInfo;
 	private ProfessorDetailedInfo detailedInfo;
 	
-	
 	public Professor(ProfessorGeneralInfo generalInfo, ProfessorDetailedInfo detailedInfo) {
 		this.generalInfo = generalInfo;
 		this.detailedInfo = detailedInfo;
