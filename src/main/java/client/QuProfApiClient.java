@@ -17,8 +17,8 @@ import responseObjects.ProfessorDetailedInfo;
 import responseObjects.ProfessorGeneralInfo;
 
 public class QuProfApiClient {
-	public ArrayList<Professor> getProfessors() {
-        String facultyListingeEndpoint = "https://www.qu.edu/FacultyAndStaffListingApi/GetProfiles/?page=1";
+	public ArrayList<Professor> getProfessors(int pageNumber) {
+        String facultyListingeEndpoint = String.format("https://www.qu.edu/FacultyAndStaffListingApi/GetProfiles/?page=%d", pageNumber);
         Response response = HttpRequest.get(facultyListingeEndpoint);
         JsonObject jsonResponse = (JsonObject)response.getBody();
         JsonArray staffListingJson = jsonResponse.get("StaffListing").getAsJsonArray(); 
